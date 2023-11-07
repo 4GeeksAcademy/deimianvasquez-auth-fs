@@ -25,6 +25,7 @@ def register_user():
     body = request.json
     email = body.get("email")
     password = body.get("password")
+    gender = body.get("gender")
 
     if email is None or password is None:
         return jsonify({"message":"You need email and password"}), 400
@@ -41,7 +42,7 @@ def register_user():
     else:
         salt = b64encode(os.urandom(32)).decode("utf-8")
         password = set_password(password, salt)
-        user = User(email=email, password=password, salt=salt)
+        user = User(email=email, password=password, salt=salt, gender=gender)
         db.session.add(user)
 
         try:
@@ -78,15 +79,15 @@ def handle_login():
                 return jsonify({"message":"Bad credentials"}), 400
             
 
+
 @api.route("/user", methods=["GET"])
 @jwt_required()
 def get_all_users():
-    data_token = get_jwt_identity()
-    if data_token.get("rol") == "admin":
-        users = User.query.all()
-        return jsonify(list(map(lambda item: item.serialize(), users)))
-    else:
-        return jsonify({"message":"no access"}), 401
+    # data_token = get_jwt_identity()
+   
+    users = User.query.all()
+    return jsonify(list(map(lambda item: item.serialize(), users)))
+   
 
 
 @api.route("/user/<int:theid>", methods=["GET"])
@@ -95,3 +96,6 @@ def get_one_user(theid=None):
     if user is None:
         return jsonify({"message":"user not found"}), 404
     return jsonify(user.serialize())
+
+
+
